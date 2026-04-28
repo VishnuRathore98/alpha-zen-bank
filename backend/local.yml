@@ -14,7 +14,7 @@ services:
 
 networks:
   alpha_zen_local_nw:
-  external: true
+    external: true
 
 volumes:
   alpha_zen_local_db:

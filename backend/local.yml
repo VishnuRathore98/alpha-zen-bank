@@ -2,9 +2,9 @@ services:
   postgres:
     build:
       context: .
-      dockerfile: ./backend/docker/local/postgres/Dockerfile
+      dockerfile: ./docker/local/postgres/Dockerfile
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - alpha_zen_local_db:/var/lib/postgresql/data
     env_file:

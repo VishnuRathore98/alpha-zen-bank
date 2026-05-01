@@ -1,9 +1,9 @@
-from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from app.core.config import settings
-from app.api.routers import router
-from app.core.loguru_logging import logger
 from app.core.db import init_db
+from app.api.routers import router
+from app.core.config import settings
+from contextlib import asynccontextmanager
+from app.core.loguru_logging import logger
 
 
 @asynccontextmanager

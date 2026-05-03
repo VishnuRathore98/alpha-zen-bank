@@ -4,7 +4,7 @@ FROM python:${PYTHON_VERSION}-slim-bookworm AS python
 
 FROM python AS python-build-stage
 
-RUN apt-get update & apt-get install \
+RUN apt-get update && apt-get install \
     --no-install-recommends -y \
     build-essential \
     libpq-dev

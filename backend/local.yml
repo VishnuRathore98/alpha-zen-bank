@@ -1,4 +1,29 @@
 services:
+  traefik:
+    image: docker.io/traefik:v3.2
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./backend/docker/local/traefik/traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      - alpha_zen_local_nw
+    command:
+      - --providers.docker
+
+  api: &api
+    build:
+      context: .
+      dockerfile: 
+    volumes:
+      - 
+      - 
+    ports:
+      -
+
+
   postgres:
     build:
       context: .

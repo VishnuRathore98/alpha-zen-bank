@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install \
     build-essential \
     libpq-dev
 
-COPY ./backend/requirements.txt .
+COPY requirements.txt .
 
 RUN pip wheel --wheel-dir /usr/src/app/wheels \
     -r requirements.txt \
@@ -45,9 +45,9 @@ COPY --from=python-build-stage /usr/src/app/wheels /wheels/
 RUN pip install --no-cache-dir --no-index --find-links=/wheels/ /wheels/* \
     && rm -rf /wheels/
 
-COPY --chown=${APP_USER}:${APP_GROUP} ./backend/docker/local/fastapi/entrypoint.sh /entrypoint.sh
+COPY --chown=${APP_USER}:${APP_GROUP} docker/local/fastapi/entrypoint.sh /entrypoint.sh
 
-COPY --chown=${APP_USER}:${APP_GROUP} ./backend/docker/local/fastapi/start.sh /start.sh
+COPY --chown=${APP_USER}:${APP_GROUP} docker/local/fastapi/start.sh /start.sh
 
 RUN chmod +x /entrypoint.sh /start.sh
 

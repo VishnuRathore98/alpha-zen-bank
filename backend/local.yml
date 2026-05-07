@@ -7,7 +7,7 @@ services:
       - "8080:8080"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./backend/docker/local/traefik/traefik.yml:/etc/traefik/traefik.yml
+      - ./docker/local/traefik/traefik.yml:/etc/traefik/traefik.yml
     networks:
       - alpha_zen_local_nw
     command:
@@ -16,13 +16,48 @@ services:
   api: &api
     build:
       context: .
-      dockerfile: 
-    volumes:
-      - 
-      - 
-    ports:
-      -
+      dockerfile: ./docker/local/fastapi/Dockerfile
 
+    volumes:
+      - .:/src
+      - ./app/logs:/src/backend/app/logs
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - ./.envs/.env.local
+
+    depends_on:
+      - postgres
+      - mailpit
+
+    command: /start.sh
+
+    networks:
+      - alpha_zen_local_nw
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.router.api.entrypoint=web"
+      - "traefik.http.router.api.rule=Host(`api.localhost`)"
+      - "traefik.http.router.api.service=api-service"
+      - "traefik.http.services.api-service.loadbalancer.server.port=8000"
+
+  mailpit:
+    image: docker.io/axllent/mailpit:v1.20.3
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    volumes:
+      - alpha_mailpit_data:/data
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATA_FILE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    networks:
+      - alpha_zen_local_nw
 
   postgres:
     build:
@@ -43,3 +78,4 @@ networks:
 
 volumes:
   alpha_zen_local_db:
+  alpha_mailpit_data:

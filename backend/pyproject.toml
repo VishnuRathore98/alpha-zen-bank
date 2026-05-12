@@ -5,7 +5,15 @@ description = "An truly AI enabled and powered banking application"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
+    "aiosmtplib>=5.1.0",
+    "celery>=5.6.3",
+    "email-validator>=2.3.0",
+    "fastapi-mail>=1.6.4",
     "fastapi[standard]>=0.136.1",
+    "flower>=2.0.1",
+    "jsonpickle>=4.1.1",
     "loguru>=0.7.3",
+    "redis>=7.4.0",
+    "redisbeat>=1.2.2",
     "sqlmodel>=0.0.38",
 ]

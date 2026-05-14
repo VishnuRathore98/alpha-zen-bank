@@ -19,10 +19,12 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = ""
     PROJECT_DESCRIPTION: str = ""
+
     API_V1_STR: str = ""
     SITE_NAME: str = ""
 
     DATABASE_URL: str = ""
+
     MAIL_FROM: str = ""
     MAIL_FROM_NAME: str = ""
 
@@ -36,6 +38,8 @@ class Settings(BaseSettings):
 
     RABBITMQ_HOST: str = "rabbitmq"
     RABBITMQ_PORT: int = 5672
+    RABBITMQ_USER: str = "guest"
+    RABBITMQ_PASSWORD: str = "guest"
 
 
 settings = Settings()

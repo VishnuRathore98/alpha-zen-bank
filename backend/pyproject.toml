@@ -17,3 +17,9 @@ dependencies = [
     "redisbeat>=1.2.2",
     "sqlmodel>=0.0.38",
 ]
+
+[tool.pyrefly]
+project-includes = [
+    "**/*.py*",
+    "**/*.ipynb",
+]

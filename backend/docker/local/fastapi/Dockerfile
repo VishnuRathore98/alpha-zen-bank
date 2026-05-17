@@ -49,7 +49,11 @@ COPY --chown=${APP_USER}:${APP_GROUP} docker/local/fastapi/entrypoint.sh /entryp
 
 COPY --chown=${APP_USER}:${APP_GROUP} docker/local/fastapi/start.sh /start.sh
 
-RUN chmod +x /entrypoint.sh /start.sh
+COPY --chown=${APP_USER}:${APP_GROUP} docker/local/fastapi/celery/beat/start.sh /start-celery-beat.sh
+COPY --chown=${APP_USER}:${APP_GROUP} docker/local/fastapi/celery/flower/start.sh /start-flower.sh
+COPY --chown=${APP_USER}:${APP_GROUP} docker/local/fastapi/celery/worker/start.sh /start-celery-worker.sh
+
+RUN chmod +x /entrypoint.sh /start.sh /start-celery-beat.sh /start-celery-worker.sh /start-flower.sh
 
 COPY --chown=${APP_USER}:${APP_GROUP} . ${APP_HOME}
 

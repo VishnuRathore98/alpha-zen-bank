@@ -4,7 +4,7 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-FLOWER_CMD = "celery \
+FLOWER_CMD="celery \
     -A backend.app.core.celery_app \
     -b ${CELERY_BROKER_URL} \
     flower \

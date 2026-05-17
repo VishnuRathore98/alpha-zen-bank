@@ -21,7 +21,7 @@ providers:
     endpoint: "unix:///var/run/docker.sock"
     watch: true
     exposedByDefault: false
-    network: alpha_zen_local_nw
+    network: alphazen_local_nw
 
 entryPoints:
   web:

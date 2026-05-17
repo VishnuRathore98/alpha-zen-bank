@@ -9,7 +9,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./docker/local/traefik/traefik.yml:/etc/traefik/traefik.yml
     networks:
-      - alpha_zen_local_nw
+      - alphazen_local_nw
     command:
       - --providers.docker
 
@@ -31,11 +31,13 @@ services:
     depends_on:
       - postgres
       - mailpit
+      - redis
+      - rabbitmq
 
     command: /start.sh
 
     networks:
-      - alpha_zen_local_nw
+      - alphazen_local_nw
 
     labels:
       - "traefik.enable=true"
@@ -50,14 +52,14 @@ services:
       - "8025:8025"
       - "1025:1025"
     volumes:
-      - alpha_mailpit_data:/data
+      - alphazen_mailpit_data:/data
     environment:
       MP_MAX_MESSAGES: 5000
       MP_DATA_FILE: /data/mailpit.db
       MP_SMTP_AUTH_ACCEPT_ANY: 1
       MP_SMTP_AUTH_ALLOW_INSECURE: 1
     networks:
-      - alpha_zen_local_nw
+      - alphazen_local_nw
 
   postgres:
     build:
@@ -66,16 +68,67 @@ services:
     ports:
       - "5433:5432"
     volumes:
-      - alpha_zen_local_db:/var/lib/postgresql/data
+      - alphazen_local_db:/var/lib/postgresql/data
     env_file:
       - ./.envs/.env.local
     networks:
-      - alpha_zen_local_nw
+      - alphazen_local_nw
+
+  redis:
+    image: docker.io/redis:7.0-alpine
+    command: redis-server --appendonly yes
+    networks:
+      - alphazen_local_nw
+
+  rabbitmq:
+    image: docker.io/rabbitmq:3.13-management
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - alphazen_rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - alphazen_local_nw
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.router.rabbitmq.entrypoint=web"
+      - "traefik.http.router.rabbitmq.rule=Host(`rabbitmq.localhost`)"
+      - "traefik.http.router.rabbitmq.service=rabbitmq-service"
+      - "traefik.http.services.rabbitmq-service.loadbalancer.server.port=15672"
+
+  celeryworker:
+    <<: *api
+    ports: []
+    command: /start-celery-worker.sh
+
+  celerybeat:
+    <<: *api
+    ports: []
+    command: /start-celery-beat.sh
+
+  flower:
+    <<: *api
+    ports:
+      - "5555:5555"
+    volumes:
+      - alphazen_flower_data
+    command: /start-flower.sh
+    depends_on:
+      - redis
+      - rabbitmq
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.router.flower.entrypoint=web"
+      - "traefik.http.router.flower.rule=Host(`flower.localhost`)"
+      - "traefik.http.router.flower.service=flower-service"
+      - "traefik.http.services.flower-service.loadbalancer.server.port=5555"
 
 networks:
-  alpha_zen_local_nw:
+  alphazen_local_nw:
     external: true
 
 volumes:
-  alpha_zen_local_db:
-  alpha_mailpit_data:
+  alphazen_local_db:
+  alphazen_mailpit_data:
+  alphazen_flower_data:
+  alphazen_rabbitmq_data:

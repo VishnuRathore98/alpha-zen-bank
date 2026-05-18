@@ -111,7 +111,7 @@ services:
     ports:
       - "5555:5555"
     volumes:
-      - alphazen_flower_data
+      - alphazen_flower_data:/var/lib/flower
     command: /start-flower.sh
     depends_on:
       - redis

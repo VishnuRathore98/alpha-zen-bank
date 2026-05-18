@@ -14,5 +14,5 @@ FLOWER_CMD="celery \
 
 exec watchfiles \
     --filter python \
-    --ignore_paths '.venv, .git, __pycache__, *.pyc' \
+    --ignore-paths '.venv, .git, __pycache__, *.pyc' \
     "${FLOWER_CMD}"

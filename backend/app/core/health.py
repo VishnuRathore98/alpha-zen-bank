@@ -55,7 +55,7 @@ class HealthCheck:
         retry_delay: float = 1.0,
         max_retries: int = 3,
         depends_on: list[str] | None = None,
-    ):
+    ) -> None:
         self._services[service_name] = ServiceStatus.STARTED
         self._check_functions[service_name] = check_function
         self._timeouts[service_name] = timeout
@@ -69,3 +69,17 @@ class HealthCheck:
             logger.info(
                 f"Service '{service_name}' registered with dependencies: {depends_on}"
             )
+
+    async def check_database(self) -> bool:
+        try:
+            # TODO: load models
+            # TODO: add logger info
+            async with async_session() as session:
+                await session.execute(text("SELECT 1"))
+                await session.commit()
+
+                self._last_check["database"] = datetime.now(timezone.utc)
+                return True
+        except Exception as e:
+            logger.error(f"Database health check failed: {e}")
+            return False

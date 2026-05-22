@@ -83,3 +83,13 @@ class HealthCheck:
         except Exception as e:
             logger.error(f"Database health check failed: {e}")
             return False
+
+    async def check_redis(self) -> bool:
+        try:
+            redis_client = celery_app.backend.client
+            redis_client.ping()
+            self._last_check["redis"] = datetime.now(timezone.utc)
+            return True
+        except Exception as e:
+            logger.error(f"Redis health check failed: {e}")
+            return False

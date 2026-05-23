@@ -93,3 +93,33 @@ class HealthCheck:
         except Exception as e:
             logger.error(f"Redis health check failed: {e}")
             return False
+
+    async def check_celery(self) -> bool:
+        try:
+            inspect = celery_app.control.inspect()
+            workers = inspect.ping()
+
+            if not workers:
+                conn = celery_app.connection()
+                try:
+                    conn.ensure_connection(max_retries=3)
+                    logger.warning("No celery workers found, but Rabbitmq is reachable")
+
+                    self._last_check["celery"] = datetime.now(timezone.utc)
+                    return True
+                finally:
+                    conn.close()
+
+            self._last_check["celery"] = datetime.now(timezone.utc)
+            return True
+
+        except Exception as e:
+            logger.error(f"Celery health check failed: {e}")
+            return False
+
+    async def check_service_health(
+        self, service_name: str, max_retries: int = 3
+    ) -> ServiceStatus:
+        if service_name in self._dependencies:
+            for dependency in self._dependencies[service_name]:
+                dependency_status = self.check_service_health(dependency)

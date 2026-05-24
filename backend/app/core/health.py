@@ -123,3 +123,16 @@ class HealthCheck:
         if service_name in self._dependencies:
             for dependency in self._dependencies[service_name]:
                 dependency_status = self.check_service_health(dependency)
+
+                if dependency_status != ServiceStatus.HEALTHY:
+                    logger.error(
+                        f"Dependency {dependency} not healthy for service {service_name}"
+                    )
+                    return ServiceStatus.DEGRADED
+
+        if service_name not in self._check_functions:
+            raise ValueError(f"Unknown service: {service_name}")
+        check_function = self._check_functions[service_name]
+        timeout = self._timeouts.get(service_name, 5.0)
+        max_retries = self._max_retries[service_name]
+        retry_delay = self._retry_delays[service_name]

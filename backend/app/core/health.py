@@ -136,3 +136,26 @@ class HealthCheck:
         timeout = self._timeouts.get(service_name, 5.0)
         max_retries = self._max_retries[service_name]
         retry_delay = self._retry_delays[service_name]
+
+        metrics = {"attempts":0, "total_delay":0.0, "last_error":None}
+
+        for attempt in range(max_retries):
+            metrics["attempts"] += 1
+            try:
+                async with asyncio.timeout(timeout):
+                    is_healthy = await check_function()
+
+                    if is_healthy:
+                        async with self._lock:
+                            self._services[service_name] = ServiceStatus.HEALTHY
+                            self._last_check[service_name] = datetime.now()
+
+                            if attempt>0:
+                                logger.info(
+                                    f"Service {service_name} recovered after {metrics['attempts']} attempts"
+                                )
+                        return ServiceStatus.HEALTHY
+
+                    async with self._lock:
+                        self._services[service_name] = ServiceStatus.DEGRADED
+                        

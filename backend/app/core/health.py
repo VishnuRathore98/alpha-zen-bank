@@ -180,3 +180,19 @@ class HealthCheck:
             )
 
         return ServiceStatus.UNHEALTHY
+
+    async def check_all_services(self) -> Dict[str, Any]:
+        current_time = datetime.now(timezone.utc)
+        if (
+            self._cached_status is not None
+            and self._last_check_time is not None
+            and (current_time - self._last_check_time) < self._cache_duration
+        ):
+            return self._cached_status
+        async with self._lock:
+            services = list[self._services.keys()]
+        tasks = [self._check_service_health(service) for service in services]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        health_status = {""}
+        ...

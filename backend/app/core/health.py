@@ -194,5 +194,30 @@ class HealthCheck:
         tasks = [self._check_service_health(service) for service in services]
         results = await asyncio.gather(*tasks, return_exceptions=True)
 
-        health_status = {""}
-        ...
+        health_status = {
+            "status": ServiceStatus.HEALTHY,
+            "timestamp": current_time.isoformat(),
+            "services": {},
+        }
+
+        for service, result in zip(services, results):
+            if isinstance(service, Exception):
+                health_status["services"][service] = {
+                    "status": ServiceStatus.UNHEALTHY,
+                    "error": str(result),
+                    "last_check": self._last_check[service].isoformat(),
+                }
+                health_status["status"] = ServiceStatus.DEGRADED
+            else:
+                health_status["services"][service] = {
+                    "status": ServiceStatus.UNHEALTHY,
+                    "last_check": self._last_check[service].isoformat(),
+                }
+
+            if result != ServiceStatus.HEALTHY:
+                health_status["status"] = ServiceStatus.DEGRADED
+
+        self._cached_status = health_status
+        self._last_check_time = current_time
+
+        return health_status

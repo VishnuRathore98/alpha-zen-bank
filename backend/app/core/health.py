@@ -221,3 +221,16 @@ class HealthCheck:
         self._last_check_time = current_time
 
         return health_status
+
+    async def wait_for_services(self, timeout: float = 30.0) -> bool:
+        try:
+            start_time = datetime.now()
+            while (datetime.now() - start_time) < timedelta(seconds=timeout):
+                status = await self.check_all_services()
+                if status["status"] == ServiceStatus.HEALTHY:
+                    return True
+                await asyncio.sleep(1)
+            return False
+        except Exception as e:
+            logger.error(f"Error waiting for services: {e}")
+            return False

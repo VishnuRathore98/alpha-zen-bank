@@ -234,3 +234,15 @@ class HealthCheck:
         except Exception as e:
             logger.error(f"Error waiting for services: {e}")
             return False
+
+    async def cleanup(self) -> None:
+        async with self._lock:
+            self._services.clear()
+            self._last_check.clear()
+            self._check_functions.clear()
+            self._timeouts.clear()
+            self._retry_delays.clear()
+            self._max_retries.clear()
+
+
+health_checker = HealthCheck()

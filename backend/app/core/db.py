@@ -1,6 +1,9 @@
+import asyncio
 from math import exp
+from sqlalchemy import text
 from typing import AsyncGenerator
 from app.core.config import settings
+from sqlalchemy.pool import AsyncAdaptedQueuePool
 from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.loguru_logging import get_logger, LoggerType
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncEngine
@@ -8,7 +11,15 @@ from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, Asyn
 logger: LoggerType = get_logger()
 
 
-engine: AsyncEngine = create_async_engine(settings.DATABASE_URL)
+engine: AsyncEngine = create_async_engine(
+    settings.DATABASE_URL,
+    poolclass=AsyncAdaptedQueuePool,
+    pool_pre_ping=True,
+    pool_size=5,
+    max_overflow=10,
+    pool_timeout=30,
+    pool_recycle=1800,
+)
 
 
 async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(

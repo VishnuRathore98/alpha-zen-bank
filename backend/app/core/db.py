@@ -30,13 +30,25 @@ async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    session = async_session()
     try:
         yield session
     except Exception as e:
-        await session.rollback()
+        logger.error(f"Database session error: {e}")
+        if session:
+            try:
+                await session.rollback()
+                logger.info("Successfully rolled back session after error")
+            except Exception as rollback_error:
+                logger.error(f"Error during session rollback: {rollback_error}")
         raise
     finally:
-        await session.close()
+        if session:
+            try:
+                await session.close()
+                logger.debug("Database session closed successfully")
+            except Exception as close_error:
+                logger.error(f"Error closing database session: {close_error}")
 
 
 async def init_db() -> None:

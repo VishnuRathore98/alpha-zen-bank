@@ -1,3 +1,4 @@
+from os import error
 import asyncio
 from math import exp
 from sqlalchemy import text
@@ -52,4 +53,24 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db() -> None:
-    pass
+    try:
+        max_retries = 3
+        retry_delay = 2
+
+        for attempt in range(max_retries):
+            try:
+                async with engine.begin() as conn:
+                    await conn.excute(text("SELECT 1"))
+                logger.info("Database connection verified successfully")
+                break
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    logger.error(
+                        f"Failed to verify database connection after {max_retries} attempts"
+                    )
+                    raise
+                logger.warning(f"Database connection attempt {attempt+1}")
+                await asyncio.sleep(retry_delay * (attempt + 1))
+    except Exception as e:
+        logger.error(f"Database initialization failed: {e}")
+        raise

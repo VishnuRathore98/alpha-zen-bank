@@ -1,9 +1,42 @@
 from fastapi import FastAPI
-from app.core.db import init_db
+from app.core.db import init_db, engine
 from app.api.routers import router
 from app.core.config import settings
 from contextlib import asynccontextmanager
 from app.core.loguru_logging import logger
+from fastapi.responses import JSONResponse
+from app.core.loguru_logging import get_logger
+from app.core.health import health_checker, ServiceStatus
+import asyncio
+import time
+
+logger = get_logger()
+
+
+async def startup_health_check(timeout: float = 90.0) -> bool:
+    try:
+        async with asyncio.timeout(timeout):
+            retry_intervals = [1, 2, 5, 10, 15]
+            start_time = time.time()
+            while True:
+                is_healthy = await health_checker.wait_for_services()
+                if is_healthy:
+                    return True
+                elapsed = time.time() - start_time
+                if elapsed >= timeout:
+                    logger.error(f"Services failed health check during startup")
+                    return False
+                wait_time = retry_intervals[
+                    min(len(retry_intervals) - 1, int(elapsed / 10))
+                ]
+                logger.warning(f"Services not health, waiting {wait_time} before retry")
+                await asyncio.sleep(wait_time)
+    except asyncio.TimeoutError:
+        logger.error(f"Health check timed out after {timeout} seconds")
+        return False
+    except Exception as e:
+        logger.error(f"Error during startup health check: {e}")
+        return False
 
 
 @asynccontextmanager

@@ -41,8 +41,25 @@ async def startup_health_check(timeout: float = 90.0) -> bool:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    yield
+    try:
+        await init_db()
+        logger.info("Database initialized successfully!")
+
+        await health_checker.add_service("database", health_checker.check_database)
+        await health_checker.add_service("celery", health_checker.check_celery)
+        await health_checker.add_service("redis", health_checker.check_celery)
+
+        if not await startup_health_check():
+            raise RuntimeError("Critical Services failed to start")
+        logger.info("All services initialized and healthy")
+        yield
+    except Exception as e:
+        logger.error(f"Application startup failed {e}")
+        await engine.dispose()
+        await health_checker.cleanup()
+        raise
+    finally:
+        logger.info("Shutting down application...")
 
 
 app = FastAPI(

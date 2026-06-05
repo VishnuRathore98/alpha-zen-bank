@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status
 from app.core.db import init_db, engine
 from app.api.routers import router
 from app.core.config import settings
@@ -60,6 +60,8 @@ async def lifespan(app: FastAPI):
         raise
     finally:
         logger.info("Shutting down application...")
+        await engine.dispose()
+        await health_checker.cleanup()
 
 
 app = FastAPI(
@@ -70,6 +72,26 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
     lifespan=lifespan,
 )
+
+
+async def health_check():
+    try:
+        health_status = await health_checker.check_all_services()
+        if health_check["status"] == ServiceStatus.HEALTHY:
+            status_code = status.HTTP_200_OK
+        elif health_check["status"] == ServiceStatus.DEGRADED:
+            status_code = status.HTTP_206_PARTIAL_CONTENT
+        else:
+            status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+
+        return JSONResponse(status_code=status_code, content=health_status)
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"status": ServiceStatus.UNHEALTHY, "error": str(e)},
+        )
+
 
 app.include_router(router, prefix=settings.API_V1_STR)
 

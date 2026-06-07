@@ -17,3 +17,5 @@ wheels/
 backend/.envs/.env.local
 
 logs
+
+.idea

@@ -1,5 +1,5 @@
 from celery import Celery
-from app.core.config import settings
+from backend.app.core.config import settings
 
 # Creating a Celery application named "worker".
 celery_app = Celery(

@@ -1,17 +1,15 @@
-from fastapi import FastAPI, status
-from app.core.db import init_db, engine
-from app.api.routers import router
-from app.core.config import settings
-from contextlib import asynccontextmanager
-from app.core.loguru_logging import logger
-from fastapi.responses import JSONResponse
-from app.core.loguru_logging import get_logger
-from app.core.health import health_checker, ServiceStatus
-import asyncio
 import time
+import asyncio
+from fastapi import FastAPI, status
+from backend.app.api.routers import router
+from contextlib import asynccontextmanager
+from fastapi.responses import JSONResponse
+from backend.app.core.config import settings
+from backend.app.core.db import init_db, engine
+from backend.app.core.loguru_logging import get_logger
+from backend.app.core.health import health_checker, ServiceStatus
 
 logger = get_logger()
-
 
 async def startup_health_check(timeout: float = 90.0) -> bool:
     try:
@@ -77,9 +75,9 @@ app = FastAPI(
 async def health_check():
     try:
         health_status = await health_checker.check_all_services()
-        if health_check["status"] == ServiceStatus.HEALTHY:
+        if health_status["status"] == ServiceStatus.HEALTHY:
             status_code = status.HTTP_200_OK
-        elif health_check["status"] == ServiceStatus.DEGRADED:
+        elif health_status["status"] == ServiceStatus.DEGRADED:
             status_code = status.HTTP_206_PARTIAL_CONTENT
         else:
             status_code = status.HTTP_503_SERVICE_UNAVAILABLE

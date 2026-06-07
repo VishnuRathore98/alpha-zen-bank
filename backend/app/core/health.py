@@ -4,9 +4,9 @@ from sqlalchemy import text
 from datetime import datetime, timedelta, timezone
 from typing import Dict, Any, Callable, Awaitable, Optional
 
-from app.core.db import async_session
-from app.core.celery_app import celery_app
-from app.core.loguru_logging import get_logger
+from backend.app.core.db import async_session
+from backend.app.core.celery_app import celery_app
+from backend.app.core.loguru_logging import get_logger
 
 logger = get_logger()
 

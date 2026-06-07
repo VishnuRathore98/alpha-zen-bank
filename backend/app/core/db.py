@@ -1,12 +1,10 @@
-from os import error
 import asyncio
-from math import exp
 from sqlalchemy import text
 from typing import AsyncGenerator
-from app.core.config import settings
+from backend.app.core.config import settings
 from sqlalchemy.pool import AsyncAdaptedQueuePool
 from sqlmodel.ext.asyncio.session import AsyncSession
-from app.core.loguru_logging import get_logger, LoggerType
+from backend.app.core.loguru_logging import get_logger, LoggerType
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncEngine
 
 logger: LoggerType = get_logger()
@@ -21,7 +19,6 @@ engine: AsyncEngine = create_async_engine(
     pool_timeout=30,
     pool_recycle=1800,
 )
-
 
 async_session: async_sessionmaker[AsyncSession] = async_sessionmaker(
     engine,

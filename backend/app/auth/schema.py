@@ -20,3 +20,19 @@ class SecurityQuestionsSchema(str, Enum):
         }
 
         return descriptions.get(value, "Unknown security question")
+
+
+class AccountStatusSchema(str, Enum):
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    LOCKED = "locked"
+    PENDING = "pending"
+
+
+class RoleChoiceSchema(str, Enum):
+    CUSTOMER = "customer"
+    ACCOUNT_EXECUTIVE = "account_executive"
+    BRANCH_MANAGER = "branch_manager"
+    ADMIN = "admin"
+    SUPER_ADMIN = "super_admin"
+    TELLER = "teller"

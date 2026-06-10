@@ -36,3 +36,18 @@ class RoleChoiceSchema(str, Enum):
     ADMIN = "admin"
     SUPER_ADMIN = "super_admin"
     TELLER = "teller"
+
+
+class BaseUserSchema(SQLModel):
+    username: str | None = Field(default=None, max_length=12, unique=True)
+    email: EmailStr = Field(unique=True, index=True, max_length=255)
+    first_name: str = Field(max_length=30)
+    middle_name: str | None = Field(max_length=30, default=None)
+    last_name: str = Field(max_length=30)
+    id_no: int = Field(unique=True, gt=0)
+    is_active: bool = False
+    is_superuser: bool = False
+    security_question: SecurityQuestionsSchema = Field(max_length=30)
+    security_answer: str = Field(max_length=30)
+    account_status: AccountStatusSchema = Field(default=AccountStatusSchema.INACTIVE)
+    role: RoleChoiceSchema = Field(default=RoleChoiceSchema.CUSTOMER)

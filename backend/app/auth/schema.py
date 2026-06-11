@@ -51,3 +51,12 @@ class BaseUserSchema(SQLModel):
     security_answer: str = Field(max_length=30)
     account_status: AccountStatusSchema = Field(default=AccountStatusSchema.INACTIVE)
     role: RoleChoiceSchema = Field(default=RoleChoiceSchema.CUSTOMER)
+
+
+class UserCreateSchema(BaseUserSchema):
+    password: str = Field()
+    confirm_password: str = Field()
+
+    @field_validator("confirm_password")
+    def validate_confirm_password(cls, v, value):
+        pass

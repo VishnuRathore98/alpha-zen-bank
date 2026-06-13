@@ -54,9 +54,18 @@ class BaseUserSchema(SQLModel):
 
 
 class UserCreateSchema(BaseUserSchema):
-    password: str = Field()
-    confirm_password: str = Field()
+    password: str = Field(min_length=8, max_length=40)
+    confirm_password: str = Field(min_length=8, max_length=40)
 
     @field_validator("confirm_password")
     def validate_confirm_password(cls, v, value):
-        pass
+        if "password" in value.data and v != value.data["password"]:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail={
+                    "status": "error",
+                    "message": "password do not match",
+                    "action": "please make sure that the passwords that you have entered matches!",
+                },
+            )
+        return v

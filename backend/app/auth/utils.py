@@ -1,5 +1,6 @@
 import random
 import string
+from backend.app.core.config import settings
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
@@ -13,3 +14,23 @@ def generate_otp(length: int = 6) -> str:
 
 def generate_password_hash(password: str) -> str:
     return _ph.hash(password)
+
+
+def verify_password(password: str, password_hash: str) -> bool:
+    try:
+        return _ph.verify(hash=password_hash, password=password)
+    except VerifyMismatchError:
+        return False
+
+
+def generate_username() -> str:
+    bank_name = settings.SITE_NAME
+    words = bank_name.split()
+    prefix = "".join([word[0] for word in words]).upper()
+    remaining_length = 12 - len(prefix) - 1
+    random_string = "".join(
+        random.choices(string.ascii_uppercase, string.digits, k=remaining_length)
+    )
+    username = f"{prefix}-{random_string}"
+
+    return username

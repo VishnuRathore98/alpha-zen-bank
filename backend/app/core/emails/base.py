@@ -25,6 +25,15 @@ class EmailTemplate:
     ) -> None:
         try:
             recipients_list = [email_to] is isinstance(email_to, str) else email_to
+            if not cls.template_name or not cls.template_name_plain:
+                raise ValueError("Both HTML and plain text email templates are required")
+            html_template = email_env.get_template(cls.template_name)
+            plain_template = email_env.get_template(cls.template_name_plain)
+
+            html_template = html_template.render(**context)
+            plain_template = plain_template.render(**context)
+
             
+
         except Exception as e:
             pass

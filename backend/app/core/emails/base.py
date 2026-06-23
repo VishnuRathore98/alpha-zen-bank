@@ -43,3 +43,4 @@ class EmailTemplate:
 
         except Exception as e:
             logger.error(f"Failed to queue email task for {recipients_list}: Error: {str(e)}")
+            raise

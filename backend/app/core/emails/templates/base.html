@@ -37,6 +37,8 @@
     </style>
 </head>
 <body>
-    
+   <div class="container">{% block header %}{% endblock %}<h1></h1></div> 
+   <div class="content">{% block content %}{% endblock %}</div>
+   <div class="footer">{% footer %}{% endblock %}</div>
 </body>
 </html>

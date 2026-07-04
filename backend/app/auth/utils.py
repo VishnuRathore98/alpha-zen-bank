@@ -3,6 +3,9 @@ import string
 from backend.app.core.config import settings
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+import uuid
+import jwt
+from datetime import datetime, timedelta, timezone
 
 _ph = PasswordHasher()
 
@@ -34,3 +37,7 @@ def generate_username() -> str:
     username = f"{prefix}-{random_string}"
 
     return username
+
+
+def create_activation_token(id: uuid.UUID) -> str:
+    pass

@@ -24,4 +24,28 @@ logger = get_logger()
 
 
 class UserAuthService:
-    pass
+    async def get_user_by_email(
+        self, email: str, session: AsyncSession, include_inactive: bool = False
+    ) -> User | None:
+        statement = select(User).where(User.email == email)
+
+        if not include_inactive:
+            statement = statement.where(User.is_active == True)
+
+        result = await session.exec(statement)
+
+        user = result.first()
+
+        return user
+
+    async def get_user_by_id(
+        self, id: str, session: AsyncSession, include_inactive: bool = False
+    ) -> User | None:
+        statement = select(User).where(User.id_no == id)
+
+        if not include_inactive:
+            statement = statement.where(User.is_active == True)
+
+        result = await session.exec(statement)
+        user = result.first()
+        return user

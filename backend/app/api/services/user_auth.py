@@ -38,10 +38,28 @@ class UserAuthService:
 
         return user
 
-    async def get_user_by_id(
-        self, id: str, session: AsyncSession, include_inactive: bool = False
+    async def get_user_by_id_no(
+        self,
+        id_no: str,
+        session: AsyncSession,
+        include_inactive: bool = False,
     ) -> User | None:
-        statement = select(User).where(User.id_no == id)
+        statement = select(User).where(User.id_no == id_no)
+
+        if not include_inactive:
+            statement = statement.where(User.is_active == True)
+
+        result = await session.exec(statement)
+        user = result.first()
+        return user
+
+    async def get_user_by_id(
+        self,
+        id: uuid.UUID,
+        session: AsyncSession,
+        include_inactive: bool = False,
+    ) -> User | None:
+        statement = select(User).where(User.id == id)
 
         if not include_inactive:
             statement = statement.where(User.is_active == True)

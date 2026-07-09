@@ -67,3 +67,16 @@ class UserAuthService:
         result = await session.exec(statement)
         user = result.first()
         return user
+
+    async def check_user_email_exists(self, email: str, session: AsyncSession) -> bool:
+        user = await self.check_user_email_exists(email, session)
+        return bool(user)
+
+    async def check_user_id_no_exists(self, id_no: int, session: AsyncSession) -> bool:
+        user = await self.check_user_id_no_exists(id_no, session)
+        return bool(user)
+
+    async def verify_user_password(
+        self, plain_password: str, hashed_password: str
+    ) -> bool:
+        return verify_password(plain_password, hashed_password)

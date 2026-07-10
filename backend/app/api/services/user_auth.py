@@ -80,3 +80,31 @@ class UserAuthService:
         self, plain_password: str, hashed_password: str
     ) -> bool:
         return verify_password(plain_password, hashed_password)
+
+    async def reset_user_state(
+        self,
+        user: User,
+        session: AsyncSession,
+        *,
+        clear_otp: bool = True,
+        log_action: bool = True,
+    ) -> None:
+        previous_status = user.account_status
+        user.failed_login_attempts = 0
+        user.last_failed_login = None
+
+        if clear_otp:
+            user.otp = ""
+            user.otp_expiry_time = None
+
+        if user.account_status == AccountStatusSchema.LOCKED:
+            user.account_status = AccountStatusSchema.ACTIVE
+
+        await session.commit()
+
+        await session.refresh(user)
+
+        if log_action and previous_status != user.account_status:
+            logger.info(
+                f"User {user.email} state reset: {previous_status} -> {user.account_status}"
+            )
